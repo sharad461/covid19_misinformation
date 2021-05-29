@@ -1,4 +1,4 @@
-import os, gc
+import os
 from tqdm import tqdm
 import pandas as pd
 
@@ -33,7 +33,6 @@ def filter_sampled_data():
             count += 1
             samples = []
         del df
-        gc.collect()  # Free up memory after deleting temp variables
 
 
 if __name__ == "__main__":
