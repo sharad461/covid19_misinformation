@@ -3,22 +3,25 @@ from tqdm import tqdm
 import pandas as pd
 
 from config import SampleVars, seed
-from helpers import final_in_list, makdir, savechunk
+from helpers import final_in_list, makedir, savechunk, generate_report
 
 
 def sample_dataset():
     files = os.listdir(SampleVars.input_directory)
     samples_per_output_chunk = SampleVars.output_chunk_size // 18
-    makdir(SampleVars.output_directory)
+    makedir(SampleVars.output_directory)
 
     print("reading dataset files and sampling...")
 
     count = 1
-    samples = []
+    samples, numrows = [], {}
     for file in tqdm(files):
-        df = pd.read_csv(f"{SampleVars.input_directory}/{file}")
-        sample = df.sample(frac=SampleVars.samplepct, random_state=seed)
+        filename = f"{SampleVars.input_directory}/{file}"
 
+        df = pd.read_csv(filename)
+        numrows[filename] = df.shape[0]
+
+        sample = df.sample(frac=SampleVars.samplepct, random_state=seed)
         samples.append(sample)
 
         if len(samples) > samples_per_output_chunk or final_in_list(
@@ -30,6 +33,8 @@ def sample_dataset():
             count += 1
             samples = []
         del df
+
+    generate_report(numrows, "unprocessed")
 
 
 if __name__ == "__main__":

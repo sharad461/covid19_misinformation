@@ -3,23 +3,27 @@ from tqdm import tqdm
 import pandas as pd
 
 from config import FilterVars
-from helpers import makdir, final_in_list, savechunk
+from helpers import makedir, final_in_list, savechunk, generate_report
 
 
 def filter_sampled_data():
     files = os.listdir(FilterVars.input_directory)
 
-    # Around 83000 tweets are filtered out from every sample chunk
+    # Around 83000 tweets are filtered out from every sample chunk of 150000
     samples_per_output_chunk = FilterVars.output_chunk_size // 80000
 
-    makdir(FilterVars.output_directory)
+    makedir(FilterVars.output_directory)
 
     print("filtering sampled data...")
 
     count = 1
-    samples = []
+    samples, numrows, numrows_filtered = [], {}, {}
     for file in tqdm(files):
-        df = pd.read_csv(f"{FilterVars.input_directory}/{file}")
+        filename = f"{FilterVars.input_directory}/{file}"
+
+        df = pd.read_csv(filename)
+        numrows[filename] = df.shape[0]
+
         sample = df[(df.lang == "en") & (df.tweet_type == "original")]
 
         samples.append(sample)
@@ -28,11 +32,16 @@ def filter_sampled_data():
             file, files
         ):
             # Create chunk if samples_per_output_chunk or end of list is reached
-            savechunk(FilterVars, samples, count)
+            name, count = savechunk(FilterVars, samples, count)
+
+            numrows_filtered[f"filter_output/{name}"] = count
 
             count += 1
             samples = []
         del df
+
+    generate_report(numrows, "sampled")
+    generate_report(numrows_filtered, "filtered")
 
 
 if __name__ == "__main__":
