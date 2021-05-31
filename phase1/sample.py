@@ -8,6 +8,8 @@ from helpers import final_in_list, makedir, savechunk, generate_report
 
 def sample_dataset():
     files = os.listdir(SampleVars.input_directory)
+    
+    # Supposing 10 pc of every csv file is 18 MB (csv is 180MB)
     samples_per_output_chunk = SampleVars.output_chunk_size // 18
     makedir(SampleVars.output_directory)
 
