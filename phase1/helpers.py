@@ -12,15 +12,13 @@ def makedir(path):
         os.makedirs(path)
 
 
-def savechunk(varsclass, samples, count):
+def savechunk(varsclass, samples, count, index=False):
     chunkname = f"{varsclass.output_prefix}_%03d.csv" % count
     chunk = pd.concat(samples)
-    rows = chunk.shape[0]
 
-    chunk.to_csv(f"{varsclass.output_directory}/{chunkname}", index=False)
+    chunk.to_csv(f"{varsclass.output_directory}/{chunkname}", index=index)
 
     del chunk
-    return chunkname, rows
 
 
 def generate_report(numrowsdict, processtype):

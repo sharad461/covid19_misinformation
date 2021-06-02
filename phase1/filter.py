@@ -14,10 +14,10 @@ def filter_sampled_data():
 
     makedir(FilterVars.output_directory)
 
-    print("filtering sampled data...")
+    print("filtering sampled data")
 
     count = 1
-    samples, numrows, numrows_filtered = [], {}, {}
+    samples, numrows = [], {}
     for file in tqdm(files):
         filename = f"{FilterVars.input_directory}/{file}"
 
@@ -32,16 +32,13 @@ def filter_sampled_data():
             file, files
         ):
             # Create chunk if samples_per_output_chunk or end of list is reached
-            name, count = savechunk(FilterVars, samples, count)
-
-            numrows_filtered[f"filter_output/{name}"] = count
+            savechunk(FilterVars, samples, count)
 
             count += 1
             samples = []
         del df
 
     generate_report(numrows, "sampled")
-    generate_report(numrows_filtered, "filtered")
 
 
 if __name__ == "__main__":

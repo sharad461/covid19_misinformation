@@ -14,7 +14,7 @@ def sample_dataset():
     
     makedir(SampleVars.output_directory)
 
-    print("reading dataset files and sampling...")
+    print("reading dataset files and sampling")
 
     count = 1
     samples, numrows = [], {}

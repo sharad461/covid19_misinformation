@@ -1,4 +1,5 @@
 seed = 28982  # use 28982 to reproduce the exact same sampling results as mine
+charts_folder = "figures"
 
 
 # vars for sample.py
@@ -16,3 +17,11 @@ class FilterVars:
     output_directory = "filter_output"
     output_prefix = "filtered"
     output_chunk_size = 150000  # Size of output chunks, in number of rows
+
+
+# vars for visualization.py
+class VizVars:
+    input_directory = "filter_output"  # Directory where all dataset files are
+    output_directory = "viz_output"  # Directory where all dataset files are
+    output_prefix = "viz"  # Prefix for output file names
+    output_chunk_size = 100  # Size of output chunks, in MB
