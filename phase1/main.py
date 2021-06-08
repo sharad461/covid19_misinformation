@@ -4,7 +4,7 @@ from visualization import prepare_viz_data, lineplot_tweets_daily
 
 
 if __name__ == "__main__":
-    sample_dataset()
+    # sample_dataset()
     filter_sampled_data()
     prepare_viz_data()
     lineplot_tweets_daily()

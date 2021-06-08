@@ -134,3 +134,6 @@ sample_output/
 filter_output/
 reports/
 figures/
+weekly_data/
+temp_weekly_data/
+viz_output/

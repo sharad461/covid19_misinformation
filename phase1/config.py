@@ -6,7 +6,7 @@ charts_folder = "figures"
 class SampleVars:
     samplepct = 0.1  # Sample percentage, 0.1 for 10 pc
     input_directory = "data"  # Directory where all dataset files are
-    output_directory = "sample_output"  # Directory where all dataset files are
+    output_directory = "sample_output"
     output_prefix = "sample"  # Prefix for output file names
     output_chunk_size = 100  # Size of output chunks, in MB
 
@@ -21,7 +21,15 @@ class FilterVars:
 
 # vars for visualization.py
 class VizVars:
-    input_directory = "filter_output"  # Directory where all dataset files are
-    output_directory = "viz_output"  # Directory where all dataset files are
-    output_prefix = "viz"  # Prefix for output file names
+    input_directory = "filter_output"
+    output_directory = "viz_output"
+    output_prefix = "viz"
+    output_chunk_size = 100  # Size of output chunks, in MB
+
+
+# vars for exploratory.py
+class ExploratoryVars:
+    input_directory = "filter_output"
+    output_directory = "temp_weekly_data"
+    output_prefix = "week"
     output_chunk_size = 100  # Size of output chunks, in MB
