@@ -1,5 +1,6 @@
 import pandas as pd
-import os
+# import numpy as np
+import os, re
 from tqdm import tqdm
 
 from config import ExploratoryVars
@@ -13,6 +14,15 @@ def prepare_data():
     makedir(ExploratoryVars.output_directory)
     print("collecting data for exploratory analysis")
 
+    def count_mentions(x):
+        return len(re.findall(r"(^|[^@\w])@(\w{1,15})\b", x))
+
+    def count_unique_hashtags(x):
+        return len(set(re.findall(r"(^|[^\#\w])\#(\w+)\b", x)))
+        # The hashtags column is not very accurate
+        # if x is not np.nan:
+        #     return len(set(x.split(" ")))
+
     count = 1
     samples = []
     for file in tqdm(files):
@@ -23,16 +33,35 @@ def prepare_data():
         sample = df[
             [
                 "parsed_created_at",
+                "text",
                 "hashtags",
                 "media",
                 "user_id",
                 "user_verified",
             ]
         ]
+        print(sample)
+        mentions_count = sample.text.apply(count_mentions).rename(
+            "mentions_count"
+        )
+        unique_hashtags_count = sample.text.apply(
+            count_unique_hashtags
+        ).rename("unique_hashtags_count")
 
         dates = pd.to_datetime(sample.parsed_created_at)
         weeks = dates.dt.isocalendar().week
-        sample = pd.concat([sample, weeks], axis=1)
+        sample = pd.concat(
+            [sample, weeks, mentions_count, unique_hashtags_count], axis=1
+        )
+
+        sample = sample.drop(
+            [
+                "text",
+                "hashtags",
+                # "media"
+            ],
+            axis=1,
+        )
 
         samples.append(sample)
 
@@ -50,10 +79,10 @@ def weekly_breakdown():
     files = os.listdir("temp_weekly_data")
 
     makedir("weekly_data")
-    print("breaking down into weekly data")
+    print("loading data to break down into weeks")
 
     weeks_data = {}
-    for file in tqdm(files):
+    for file in files:
         filename = f"temp_weekly_data/{file}"
 
         df = pd.read_csv(filename)
@@ -68,6 +97,7 @@ def weekly_breakdown():
 
         del df
 
+    print("saving weekly data files")
     while weeks_data:
         week = list(weeks_data.keys())[-1]
         wkdata = pd.concat(weeks_data[week])
@@ -81,12 +111,6 @@ def weekly_analysis():
 
     print("analysing weekly data")
 
-    def hashtags_split(x):
-        try:
-            return len(x.split(" "))
-        except Exception:
-            pass
-
     weeks_data = []
     tweets_count = 0
     tweets_percent_change = "N/A"
@@ -97,11 +121,11 @@ def weekly_analysis():
 
         prev_tweets_count = tweets_count
 
-        # Total no of tweets
+        # Total no of tweets in the week
         tweets_count = df.shape[0]
 
         # Number of unique tweeters
-        unique_tweeters = df.user_id.unique().shape[0]
+        num_unique_tweeters = df.user_id.unique().shape[0]
 
         # Percent change
         if prev_tweets_count:
@@ -109,8 +133,7 @@ def weekly_analysis():
                 (tweets_count - prev_tweets_count) / prev_tweets_count
             ) * 100
 
-        # Number of hashtags
-        df["unique_hashtags_count"] = df.hashtags.apply(hashtags_split)
+        # mean number of hashtags
         mean_no_of_hashtags = df.unique_hashtags_count.mean()
 
         # Grouping data by date
@@ -118,21 +141,33 @@ def weekly_analysis():
             lambda x: x.split(" ")[0]
         )
 
-        # Number of tweets by verified and unverified users
+        verified = df[df.user_verified == True]
+        unverified = df[df.user_verified == False]
+
+        # Mean number of tweets by verified and unverified users
         mean_tweets_verified_user, mean_tweets_unverified_user = (
-            df[df.user_verified == True]
-            .groupby(["tweet_date"])
-            .count()
-            .user_verified.mean(),
-            df[df.user_verified == False]
-            .groupby(["tweet_date"])
-            .count()
-            .user_verified.mean(),
+            verified.shape[0] / verified.user_id.unique().shape[0],
+            unverified.shape[0] / unverified.user_id.unique().shape[0],
         )
+
+        # Handle zero division:
+
+        # try:
+        #     mean_tweets_verified_user = verified.shape[0] / verified.user_id.unique().shape[0]
+        # except ZeroDivisionError:
+        #     mean_tweets_verified_user = 0
+        #     print(verified.shape[0], verified.user_id.unique())
+
+        
+        # try:
+        #     mean_tweets_unverified_user = unverified.shape[0] / unverified.user_id.unique().shape[0]
+        # except ZeroDivisionError:
+        #     mean_tweets_unverified_user = 0
+        #     print(unverified.shape[0], unverified.user_id.unique())
 
         week_by_date = df.groupby(["tweet_date"]).count()
         week_by_date_date = week_by_date.parsed_created_at
-        
+
         weeks_data.append(
             [
                 os.path.splitext(file)[0][-2:],
@@ -140,7 +175,7 @@ def weekly_analysis():
                 week_by_date_date.max(),
                 week_by_date_date.median(),
                 week_by_date_date.mean(),
-                unique_tweeters,
+                num_unique_tweeters,
                 tweets_percent_change,
                 tweets_count,
                 mean_no_of_hashtags,
@@ -161,14 +196,14 @@ def weekly_analysis():
             "Percent change",
             "Tweets count",
             "Mean (Hashtags in a tweet)",
-            "Mean (Verified user tweets in a day)",
-            "Mean (Unverified user tweets in a day)",
+            "Mean (Tweets per verified user)",
+            "Mean (Tweets per unverified user)",
         ],
     )
 
     data.to_csv("exploratory.csv", index=False)
 
 
-# prepare_data()
-# weekly_breakdown()
+prepare_data()
+weekly_breakdown()
 weekly_analysis()
