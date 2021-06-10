@@ -1,5 +1,4 @@
 import pandas as pd
-# import numpy as np
 import os, re
 from tqdm import tqdm
 
@@ -7,7 +6,7 @@ from config import ExploratoryVars
 from helpers import final_in_list, savechunk, makedir
 
 
-def prepare_data():
+def prepare_weekly_data():
     files = os.listdir(ExploratoryVars.input_directory)
     samples_per_output_chunk = ExploratoryVars.output_chunk_size // 10
 
@@ -19,7 +18,8 @@ def prepare_data():
 
     def count_unique_hashtags(x):
         return len(set(re.findall(r"(^|[^\#\w])\#(\w+)\b", x)))
-        # The hashtags column is not very accurate
+        # The hashtags column is not very accurate so we will
+        # search for hashtags in the texts themselves
         # if x is not np.nan:
         #     return len(set(x.split(" ")))
 
@@ -40,7 +40,7 @@ def prepare_data():
                 "user_verified",
             ]
         ]
-        print(sample)
+        
         mentions_count = sample.text.apply(count_mentions).rename(
             "mentions_count"
         )
@@ -136,11 +136,6 @@ def weekly_analysis():
         # mean number of hashtags
         mean_no_of_hashtags = df.unique_hashtags_count.mean()
 
-        # Grouping data by date
-        df["tweet_date"] = df.parsed_created_at.apply(
-            lambda x: x.split(" ")[0]
-        )
-
         verified = df[df.user_verified == True]
         unverified = df[df.user_verified == False]
 
@@ -158,13 +153,16 @@ def weekly_analysis():
         #     mean_tweets_verified_user = 0
         #     print(verified.shape[0], verified.user_id.unique())
 
-        
         # try:
         #     mean_tweets_unverified_user = unverified.shape[0] / unverified.user_id.unique().shape[0]
         # except ZeroDivisionError:
         #     mean_tweets_unverified_user = 0
         #     print(unverified.shape[0], unverified.user_id.unique())
-
+        
+        # Grouping data by date
+        df["tweet_date"] = df.parsed_created_at.apply(
+            lambda x: x.split(" ")[0]
+        )
         week_by_date = df.groupby(["tweet_date"]).count()
         week_by_date_date = week_by_date.parsed_created_at
 
@@ -204,6 +202,7 @@ def weekly_analysis():
     data.to_csv("exploratory.csv", index=False)
 
 
-prepare_data()
-weekly_breakdown()
-weekly_analysis()
+if __name__ == "__main__":
+    prepare_weekly_data()
+    weekly_breakdown()
+    weekly_analysis()
