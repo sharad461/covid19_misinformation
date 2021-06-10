@@ -9,9 +9,9 @@ Create folder `sample_output` inside `phase1`. Copy all dataset csv files into `
 
 `main.py` imports all these methods and runs them.
 
-After the code has run successfully, the results can be found in these folders are files:
-`figures` folder will have the graphs.
-`reports` folder will have row counts of the files.
-`exploratory.csv` will have detailed stats about the data.
+After the code has run successfully, the results can be found in these folders and files:
+- `figures` folder will have the graphs.
+- `reports` folder will have row counts of the files.
+- `exploratory.csv` will have detailed stats about the data.
 
 `phase1/config.py` has arguments like `samplepct` which can be changed to customize the operation.
