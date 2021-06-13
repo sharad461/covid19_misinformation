@@ -87,6 +87,92 @@ def lineplot_tweets_daily(save=True):
     plt.show()
 
 
+def lineplots_exploratory_data(save=True):
+    df = pd.read_csv("exploratory.csv")
+
+    makedir(charts_folder)
+
+    subfolder = time.strftime("%Y%m%d")
+    makedir(f"{charts_folder}/{subfolder}")
+
+    percent_change = df[["Week number (of year)", "Percent change"]]
+    min_max = df[
+        [
+            "Week number (of year)",
+            "Min (Tweets in a day)",
+            "Max (Tweets in a day)",
+            "Median (Tweets in a day)",
+            "Mean (Tweets in a day)",
+        ]
+    ]
+    tweet_numbers = df[
+        [
+            "Week number (of year)",
+            "Unique tweeters",
+            "Tweets count",
+        ]
+    ]
+    hashtags_media = df[
+        [
+            "Week number (of year)",
+            "Mean (Tweets with link or media)",
+            "Mean (Hashtags in a tweet)",
+        ]
+    ]
+    verified_unverified = df[
+        [
+            "Week number (of year)",
+            "Mean (Tweets per verified user)",
+            "Mean (Tweets per unverified user)",
+        ]
+    ]
+
+    data = [
+        min_max,
+        hashtags_media,
+        tweet_numbers,
+        verified_unverified,
+    ]
+
+    f, axes = plt.subplots(2, 2, figsize=(12, 12))
+
+    for i, d in enumerate(data):
+        sns.lineplot(
+            x="Week number (of year)",
+            y="no of tweets",
+            hue="type",
+            data=pd.melt(
+                d,
+                ["Week number (of year)"],
+                var_name="type",
+                value_name="no of tweets",
+            ),
+            ax=axes.flat[i],
+        )
+
+    if save:
+        fig = f.get_figure()
+        figname = time.strftime("lineplots_%Y%m%d_%H%M%S.png")
+        fig.savefig(f"{charts_folder}/{subfolder}/{figname}")
+
+    plt.figure()
+
+    line = sns.lineplot(
+        x="Week number (of year)",
+        y="Percent change",
+        data=percent_change,
+    )
+
+    if save:
+        makedir(charts_folder)
+        fig = line.get_figure()
+        figname = time.strftime("lineplot_pc_change_%Y%m%d_%H%M%S.png")
+        fig.savefig(f"{charts_folder}/{subfolder}/{figname}")
+
+    plt.show()
+
+
 if __name__ == "__main__":
     prepare_viz_data()
     lineplot_tweets_daily()
+    # lineplots_exploratory_data()
