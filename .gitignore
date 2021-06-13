@@ -137,3 +137,5 @@ figures/
 weekly_data/
 temp_weekly_data/
 viz_output/
+exploratory.csv
+tweetids.csv
