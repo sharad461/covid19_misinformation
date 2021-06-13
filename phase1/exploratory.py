@@ -12,6 +12,8 @@ def prepare_weekly_data():
     samples_per_output_chunk = ExploratoryVars.output_chunk_size // 10
 
     makedir(ExploratoryVars.output_directory)
+    makedir("tweet_ids")
+
     print("collecting data for exploratory analysis")
 
     def count_mentions(x):
@@ -25,9 +27,8 @@ def prepare_weekly_data():
         #     return len(set(x.split(" ")))
 
     count = 1
-    tweet_ids = []
     samples = []
-    for file in tqdm(files):
+    for i, file in enumerate(tqdm(files)):
         filename = f"{ExploratoryVars.input_directory}/{file}"
 
         df = pd.read_csv(filename)
@@ -91,7 +92,8 @@ def prepare_weekly_data():
         )
 
         samples.append(sample)
-        tweet_ids.append(ids)
+
+        ids.to_csv(f"tweet_ids/tweetids_{i}.csv", index=False, header=False)
 
         if len(samples) > samples_per_output_chunk or final_in_list(
             file, files
@@ -101,9 +103,6 @@ def prepare_weekly_data():
             count += 1
             samples = []
         del df
-
-    all_ids = pd.concat(tweet_ids)
-    all_ids.to_csv("tweetids.csv", index=False)
 
 
 def weekly_breakdown():

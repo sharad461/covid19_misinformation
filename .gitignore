@@ -139,3 +139,4 @@ temp_weekly_data/
 viz_output/
 exploratory.csv
 tweetids.csv
+tweet_ids/

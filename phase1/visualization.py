@@ -95,6 +95,10 @@ def lineplots_exploratory_data(save=True):
     subfolder = time.strftime("%Y%m%d")
     makedir(f"{charts_folder}/{subfolder}")
 
+    def saveplot(plot, filename):
+        fig = plot.get_figure()
+        fig.savefig(f"{charts_folder}/{subfolder}/{filename}")
+        
     percent_change = df[["Week number (of year)", "Percent change"]]
     min_max = df[
         [
@@ -134,10 +138,10 @@ def lineplots_exploratory_data(save=True):
         verified_unverified,
     ]
 
-    f, axes = plt.subplots(2, 2, figsize=(12, 12))
+    f, axes = plt.subplots(2, 2, figsize=(14, 14))
 
     for i, d in enumerate(data):
-        sns.lineplot(
+        line = sns.lineplot(
             x="Week number (of year)",
             y="no of tweets",
             hue="type",
@@ -150,11 +154,6 @@ def lineplots_exploratory_data(save=True):
             ax=axes.flat[i],
         )
 
-    if save:
-        fig = f.get_figure()
-        figname = time.strftime("lineplots_%Y%m%d_%H%M%S.png")
-        fig.savefig(f"{charts_folder}/{subfolder}/{figname}")
-
     plt.figure()
 
     line = sns.lineplot(
@@ -162,12 +161,10 @@ def lineplots_exploratory_data(save=True):
         y="Percent change",
         data=percent_change,
     )
-
+    
     if save:
-        makedir(charts_folder)
-        fig = line.get_figure()
-        figname = time.strftime("lineplot_pc_change_%Y%m%d_%H%M%S.png")
-        fig.savefig(f"{charts_folder}/{subfolder}/{figname}")
+        saveplot(f, time.strftime("lineplots_%Y%m%d_%H%M%S.png"))
+        saveplot(line, time.strftime("lineplot_pc_change_%Y%m%d_%H%M%S.png"))
 
     plt.show()
 
