@@ -7,6 +7,9 @@ from helpers import final_in_list, savechunk, makedir
 from visualization import lineplots_exploratory_data
 
 
+months = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
 def prepare_weekly_data():
     files = os.listdir(ExploratoryVars.input_directory)
     samples_per_output_chunk = ExploratoryVars.output_chunk_size // 10
@@ -66,7 +69,7 @@ def prepare_weekly_data():
 
         dates = pd.to_datetime(sample.parsed_created_at)
         weeks = dates.dt.isocalendar().week
-        
+
         sample = sample.drop(
             [
                 "id",
@@ -78,7 +81,7 @@ def prepare_weekly_data():
             ],
             axis=1,
         )
-        
+
         sample = pd.concat(
             [
                 tweet_date,
@@ -141,10 +144,11 @@ def weekly_analysis():
 
     print("analysing weekly data")
 
+    month = 1
     weeks_data = []
     tweets_count = 0
     tweets_percent_change = "N/A"
-    for file in tqdm(files):
+    for i, file in enumerate(tqdm(files)):
         filename = f"weekly_data/{file}"
 
         df = pd.read_csv(filename)
@@ -200,6 +204,8 @@ def weekly_analysis():
 
         weeks_data.append(
             [
+                f"A{i+1}",
+                months[month - 1],
                 os.path.splitext(file)[0][-2:],
                 week_by_date_usrid.min(),
                 week_by_date_usrid.max(),
@@ -214,10 +220,15 @@ def weekly_analysis():
                 mean_tweets_unverified_user,
             ]
         )
-    
+
+        if (i + 1) % 4 == 0:
+            month += 1
+
     data = pd.DataFrame(
         weeks_data,
         columns=[
+            "Index",
+            "Month",
             "Week number (of year)",
             "Min (Tweets in a day)",
             "Max (Tweets in a day)",
@@ -237,7 +248,7 @@ def weekly_analysis():
 
 
 if __name__ == "__main__":
-    prepare_weekly_data()
-    weekly_breakdown()
-    weekly_analysis()
+    # prepare_weekly_data()
+    # weekly_breakdown()
+    # weekly_analysis()
     lineplots_exploratory_data()

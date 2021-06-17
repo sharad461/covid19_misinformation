@@ -98,11 +98,11 @@ def lineplots_exploratory_data(save=True):
     def saveplot(plot, filename):
         fig = plot.get_figure()
         fig.savefig(f"{charts_folder}/{subfolder}/{filename}")
-        
-    percent_change = df[["Week number (of year)", "Percent change"]]
+
+    percent_change = df[["Index", "Percent change"]]
     min_max = df[
         [
-            "Week number (of year)",
+            "Index",
             "Min (Tweets in a day)",
             "Max (Tweets in a day)",
             "Median (Tweets in a day)",
@@ -111,21 +111,21 @@ def lineplots_exploratory_data(save=True):
     ]
     tweet_numbers = df[
         [
-            "Week number (of year)",
+            "Index",
             "Unique tweeters",
             "Tweets count",
         ]
     ]
     hashtags_media = df[
         [
-            "Week number (of year)",
+            "Index",
             "Mean (Tweets with link or media)",
             "Mean (Hashtags in a tweet)",
         ]
     ]
     verified_unverified = df[
         [
-            "Week number (of year)",
+            "Index",
             "Mean (Tweets per verified user)",
             "Mean (Tweets per unverified user)",
         ]
@@ -140,28 +140,41 @@ def lineplots_exploratory_data(save=True):
 
     f, axes = plt.subplots(2, 2, figsize=(14, 14))
 
+    xlabels = []
+    for i, x in enumerate(list(df["Month"])):
+        if (i + 2) % 4 == 0:
+            xlabels.append(x)
+        else:
+            xlabels.append("")
+
     for i, d in enumerate(data):
         line = sns.lineplot(
-            x="Week number (of year)",
+            x="Index",
             y="no of tweets",
             hue="type",
             data=pd.melt(
                 d,
-                ["Week number (of year)"],
+                ["Index"],
                 var_name="type",
                 value_name="no of tweets",
             ),
             ax=axes.flat[i],
         )
+        
+        line.set_xlabel("months")
+        line.set_xticklabels(xlabels)
 
     plt.figure()
 
     line = sns.lineplot(
-        x="Week number (of year)",
+        x="Index",
         y="Percent change",
         data=percent_change,
     )
-    
+
+    line.set_xlabel("months")
+    line.set_xticklabels(xlabels)
+
     if save:
         saveplot(f, time.strftime("lineplots_%Y%m%d_%H%M%S.png"))
         saveplot(line, time.strftime("lineplot_pc_change_%Y%m%d_%H%M%S.png"))
