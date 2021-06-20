@@ -5,6 +5,12 @@ Create folder `sample_output` inside `phase1`. Copy all dataset csv files into `
 
     python main.py
 
+A few columns are not present in hydrated data, run
+
+    python main.py hydrated
+
+for hydrated data.
+
 `sample.py` reads the dataset and extracts samples and `filter.py` filters tweets based on `tweet_type` (original) and `lang` (en). The functions from `sample.py` are not being used because the data seems to have already been sampled. `visualization.py` has methods that will generate graphs. Currently it only has a method of creating a line graph. `exploratory.py` has methods that prepare the entire data for weekly analysis.
 
 `main.py` imports all these methods and runs them.
