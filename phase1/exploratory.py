@@ -102,7 +102,7 @@ def prepare_weekly_data(args):
         sample = pd.concat(
             [
                 tweet_date,
-                df,
+                sample,
                 weeks,
                 mentions_count,
                 unique_hashtags_count,
@@ -224,17 +224,17 @@ def weekly_analysis(args):
 
         # Grouping data by date
         week_by_date = df.groupby(["tweet_date"]).count()
-        week_by_date_usrid = week_by_date.id
+        week_by_date_usrverified = week_by_date.user_verified
 
         weeks_data.append(
             [
                 f"A{i+1}",
                 months[month - 1],
                 os.path.splitext(file)[0][-2:],
-                week_by_date_usrid.min(),
-                week_by_date_usrid.max(),
-                week_by_date_usrid.median(),
-                week_by_date_usrid.mean(),
+                week_by_date_usrverified.min(),
+                week_by_date_usrverified.max(),
+                week_by_date_usrverified.median(),
+                week_by_date_usrverified.mean(),
                 num_unique_tweeters,
                 tweets_percent_change,
                 tweets_count,
