@@ -1,7 +1,7 @@
 # covid19_misinformation
 
 ## Setting up and running
-Create folder `sample_output` inside `phase1`. Copy all dataset csv files into `sample_output/`. Then from `phase1` run 
+Create folder `sample_output` inside `phase1`. Copy all dataset csv files into `sample_output/`. If we are not sampling data from the larger set, copy the files into `filter_output/` folder. Then from `phase1` run 
 
     python main.py
 
@@ -21,3 +21,6 @@ After the code has run successfully, the results can be found in these folders a
 - `exploratory.csv` will have detailed stats about the data.
 
 `phase1/config.py` has arguments like `samplepct` which can be changed to customize the operation.
+
+## Requirements
+Packages used: seaborn, pandas, matplotlib, tqdm. Will update with the required versions soon, but the latest (as of Jun 2021) should do fine.
