@@ -10,7 +10,7 @@ from visualization import lineplots_exploratory_data
 months = ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
-def prepare_weekly_data():
+def prepare_weekly_data(args):
     files = os.listdir(ExploratoryVars.input_directory)
     samples_per_output_chunk = ExploratoryVars.output_chunk_size // 10
 
@@ -18,6 +18,12 @@ def prepare_weekly_data():
     makedir("tweet_ids")
 
     print("collecting data for exploratory analysis")
+
+    datecol = (
+        ["created_at", "%a %b %d %H:%M:%S %z %Y"]
+        if args["hydrated"]
+        else ["parsed_created_at", None]
+    )
 
     def count_mentions(x):
         return len(re.findall(r"(^|[^@\w])@(\w{1,15})\b", x))
@@ -36,44 +42,55 @@ def prepare_weekly_data():
 
         df = pd.read_csv(filename)
 
-        sample = df[
-            [
-                "id",
-                "parsed_created_at",
-                "text",
-                "hashtags",
-                "media",
-                "urls",
-                "user_id",
-                "user_verified",
+        if "user_id" in df:
+            df = df[
+                [
+                    "id",
+                    datecol[0],
+                    "text",
+                    "hashtags",
+                    "media",
+                    "urls",
+                    "user_id",
+                    "user_verified",
+                ]
             ]
-        ]
+        else:
+            df = df[
+                [
+                    "id",
+                    datecol[0],
+                    "text",
+                    "hashtags",
+                    "media",
+                    "urls",
+                    "user_verified",
+                ]
+            ]
 
-        ids = sample.id
+        ids = df.id
 
-        media_or_url = (
-            sample["media"].notnull() | sample["urls"].notnull()
-        ).rename("media_or_url")
-
-        mentions_count = sample.text.apply(count_mentions).rename(
-            "mentions_count"
+        media_or_url = (df["media"].notnull() | df["urls"].notnull()).rename(
+            "media_or_url"
         )
 
-        unique_hashtags_count = sample.text.apply(
-            count_unique_hashtags
-        ).rename("unique_hashtags_count")
+        mentions_count = df.text.apply(count_mentions).rename("mentions_count")
 
-        tweet_date = sample.parsed_created_at.apply(
-            lambda x: x.split(" ")[0]
+        unique_hashtags_count = df.text.apply(count_unique_hashtags).rename(
+            "unique_hashtags_count"
+        )
+
+        dates = pd.to_datetime(df[datecol[0]], format=datecol[1])
+        weeks = dates.dt.isocalendar().week
+        
+        tweet_date = dates.apply(
+            lambda x: str(x).split(" ")[0]
         ).rename("tweet_date")
 
-        dates = pd.to_datetime(sample.parsed_created_at)
-        weeks = dates.dt.isocalendar().week
-
-        sample = sample.drop(
+        sample = df.drop(
             [
                 "id",
-                "parsed_created_at",
+                datecol[0],
                 "text",
                 "hashtags",
                 "media",
@@ -85,7 +102,7 @@ def prepare_weekly_data():
         sample = pd.concat(
             [
                 tweet_date,
-                sample,
+                df,
                 weeks,
                 mentions_count,
                 unique_hashtags_count,
@@ -139,10 +156,12 @@ def weekly_breakdown():
         del wkdata
 
 
-def weekly_analysis():
+def weekly_analysis(args):
     files = os.listdir("weekly_data")
 
     print("analysing weekly data")
+
+    hydrated = args["hydrated"]
 
     month = 1
     weeks_data = []
@@ -158,9 +177,6 @@ def weekly_analysis():
         # Total no of tweets in the week
         tweets_count = df.shape[0]
 
-        # Number of unique tweeters
-        num_unique_tweeters = df.user_id.unique().shape[0]
-
         # Percent change
         if prev_tweets_count:
             tweets_percent_change = (
@@ -173,11 +189,19 @@ def weekly_analysis():
         verified = df[df.user_verified == True]
         unverified = df[df.user_verified == False]
 
-        # Mean number of tweets by verified and unverified users
-        mean_tweets_verified_user, mean_tweets_unverified_user = (
-            verified.shape[0] / verified.user_id.unique().shape[0],
-            unverified.shape[0] / unverified.user_id.unique().shape[0],
-        )
+        if not hydrated:
+            # Number of unique tweeters
+            num_unique_tweeters = df.user_id.unique().shape[0]
+
+            # Mean number of tweets by verified and unverified users
+            mean_tweets_verified_user, mean_tweets_unverified_user = (
+                verified.shape[0] / verified.user_id.unique().shape[0],
+                unverified.shape[0] / unverified.user_id.unique().shape[0],
+            )
+        else:
+            num_unique_tweeters = "N/A"
+            mean_tweets_verified_user = "N/A"
+            mean_tweets_unverified_user = "N/A"
 
         # Handle zero division:
 
@@ -200,7 +224,7 @@ def weekly_analysis():
 
         # Grouping data by date
         week_by_date = df.groupby(["tweet_date"]).count()
-        week_by_date_usrid = week_by_date.user_id
+        week_by_date_usrid = week_by_date.id
 
         weeks_data.append(
             [
