@@ -68,7 +68,7 @@ def prepare_weekly_data(args):
                 ]
             ]
 
-        ids = df.id
+        # ids = df.id
 
         media_or_url = (df["media"].notnull() | df["urls"].notnull()).rename(
             "media_or_url"
@@ -113,7 +113,7 @@ def prepare_weekly_data(args):
 
         samples.append(sample)
 
-        ids.to_csv(f"tweet_ids/tweetids_{i}.csv", index=False, header=False)
+        # ids.to_csv(f"tweet_ids/tweetids_{i}.csv", index=False, header=False)
 
         if len(samples) > samples_per_output_chunk or final_in_list(
             file, files
