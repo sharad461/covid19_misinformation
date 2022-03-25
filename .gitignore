@@ -3,8 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.zip
+*.csv
+*.xlsx
+
 # C extensions
 *.so
+
+covid-proj/
 
 # Distribution / packaging
 .Python
@@ -140,3 +146,6 @@ viz_output/
 exploratory.csv
 tweetids.csv
 tweet_ids/
+full_dataset/
+visualization/
+regression/
