@@ -1,3 +1,5 @@
+# Adds retweet per follower column to the dataset
+
 import os
 import pandas as pd
 import numpy as np
